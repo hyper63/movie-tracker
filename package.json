@@ -1,0 +1,21 @@
+{
+  "name": "movie-tracker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": "true",
+  "workspaces": ["packages/client"],
+  "dependencies": {
+    "@vercel/fetch": "^6.1.0",
+    "crocks": "^0.12.4",
+    "jsonwebtoken": "^8.5.1",
+    "ms": "^2.1.2",
+    "node-fetch": "^2.6.1",
+    "ramda": "^0.27.1",
+    "zod": "^2.0.0-beta.22"
+  },
+  "devDependencies": {
+    "tape": "^5.0.1",
+    "vercel": "^21.0.1"
+  }
+}
