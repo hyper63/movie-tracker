@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "private": "true",
-  "workspaces": ["packages/client"],
+  "workspaces": ["packages/client", "services"],
   "dependencies": {
     "@vercel/fetch": "^6.1.0",
     "crocks": "^0.12.4",

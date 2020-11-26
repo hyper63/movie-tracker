@@ -1,5 +1,7 @@
 const createRequest = require('./async-req')
 const qs = require('querystring')
+const { Async } = require('crocks')
+const fetch = require('node-fetch')
 
 /**
  * @param {string} host = provide the host url for hyper63 service
@@ -9,13 +11,17 @@ const qs = require('querystring')
  * @returns {Async}
  */
 module.exports = (host, client, secret, app) => 
-  Async.of(createRequest(client,secret))
-    .chain($ => 
-      Async.all([
-        $.put(`${host}/data/${app}`),
-        $.put(`${host}/cache/${app}`)
-      ]).map(() => $)
-    )
+  Async.of(createRequest(fetch, client,secret))
+    // data should be idempotent when creating databases -tnw
+    //.chain($ => $.put(`${host}/data/${app}`).map(() => $))
+    .chain($ => $.put(`${host}/cache/${app}`).map(() => $))
+    
+  // .chain($ => //$.put(`${host}/data/${app}`)
+  //     Async.all([
+  //       $.put(`${host}/data/${app}`),
+  //       $.put(`${host}/cache/${app}`)
+  //     ]).map(() => $)
+  //   )
     .map($ => ({
       cache: {
         query: pattern => $.get(`${host}/cache/${app}?${qs.stringify({pattern: pattern || '*'})}`),
@@ -33,4 +39,4 @@ module.exports = (host, client, secret, app) =>
         remove: (id) => $.remove(`${host}/data/${app}/${id}`)
       }
     }))  
-}
+

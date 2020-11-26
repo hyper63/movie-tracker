@@ -1,22 +1,21 @@
-const fetch = require('node-fetch')
 const { Async } = require('crocks')
 const jwt = require('jsonwebtoken')
 const ms = require('ms')
-const asyncFetch = Async.fromPromise(fetch)
 const toJSON = res => Async.fromPromise(res.json.bind(res))()
 const [GET, PUT, POST, DELETE, CONTENT_TYPE, APPLICATION_JSON, BEARER] =
 ['GET', 'PUT', 'POST', 'DELETE', 'content-type', 'application/json', 'Bearer']
 
-module.exports = function(client='noname', secret='nosecret') {
+module.exports = function(fetch, client='noname', secret='nosecret') {
   var token // will be set and maintained by the fetch call
-
+  const asyncFetch = Async.fromPromise(fetch)
+  
   const doFetch = method => (url, body) => Async.of({url, method, body})
     // set token, check if expired
     .chain(data => 
       generateHeaders(client, secret)
         .map(headers => ({...data, headers}))
     )
-    .map(data => { console.log(data); return data; })
+   // .map(data => { console.log(data); return data; })
     .map(data => {
       let result = [data.url, {headers: data.headers, method: data.method}]
       if (data.body) {
@@ -24,15 +23,17 @@ module.exports = function(client='noname', secret='nosecret') {
       }
       return result
     })
+    
     .chain(([url, content]) => asyncFetch(url, content))
     .chain(response => {
+      
       if (response.status > 399) {
         return Async.Rejected({ok: false, error: response.statusText})
       }
       return Async.Resolved(response)
     })
     .chain(toJSON)
-    .toPromise()
+    
   
 
   return {
@@ -44,7 +45,7 @@ module.exports = function(client='noname', secret='nosecret') {
 
   function generateHeaders(client, secret) {
     verify = Async.fromNode(jwt.verify.bind(jwt))
-    return Async.of({CONTENT_TYPE: APPLICATION_JSON})
+    return Async.of({[CONTENT_TYPE]: APPLICATION_JSON})
       .map(headers => {
         if (!token) {
           token = jwt.sign({sub: client}, secret, {expiresIn: '1h'})
